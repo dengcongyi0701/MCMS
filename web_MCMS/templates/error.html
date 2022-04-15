@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="../static/icon_page.png" type="image/x-icon">
+    <link href="{{url_for('static', filename='css/detail.css')}}"  rel="stylesheet",type="text/css">
+    <!-- Bootstrap CSS -->
+    <link href="{{url_for('static', filename='css/bootstrap.min.css')}}"  rel="stylesheet",type="text/css">
+    <style>
+       .first {
+           float: left;
+           width: 150%;
+           height: 200px;
+           border: 1px solid #3B6273;
+       }
+       .second {
+           float:left;
+           width: 150%;
+           height: 200px;
+           border: 1px solid #3B6273;
+       }
+    </style>
+    <title>恶意代码样本库查询结果</title>
+</head>
+
+
+
+<body class="bg-light">
+<!-- 页面公共头部 导航栏 -->
+<div id="headerpage">
+    {% include "header.html" %}
+</div>
+<div class="container">
+
+<!-- 杀毒软件检测结果 -->
+<div class="py-5 text-center">
+    <img class="d-block mx-auto mb-4" src="{{url_for('static', filename='s1.png')}}" alt="" width="72" height="72">
+    <h2 class="text-danger"> <b>{{title}}</b> </h2>
+    {% if scan_sha256 %} 
+    <p class="text-muted text-secondary"> 查询的SHA256值: <b>{{scan_sha256}}</b> </p>
+    {% endif %}
+
+    {% if scan_md5 %} 
+    <p class="text-muted text-secondary"> 查询的MD5值: <b>{{scan_md5}}</b> </p>
+    {% endif %}
+</div>
+
+
+<div style="text-align:center">
+    <a class="btn btn-primary btn-lg btn-block" href="/malsample_search" style="display:inline-block; width:300px; text-align:center">返回</a>
+</div>
+</div>
+
+<!-- Add footer -->
+{% include "footer.html" %}
+
+
+<!-- End of container -->
+</div>
+</body>
+</html>

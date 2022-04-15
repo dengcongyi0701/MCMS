@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="../static/icon_page.png" type="image/x-icon">
+    <link href="{{url_for('static', filename='css/detail.css')}}"  rel="stylesheet",type="text/css">
+    <!-- Bootstrap CSS -->
+    <link href="{{url_for('static', filename='css/bootstrap.min.css')}}"  rel="stylesheet",type="text/css">
+    <style>
+       .first {
+           float: left;
+           width: 150%;
+           height: 200px;
+           border: 1px solid #3B6273;
+       }
+       .second {
+           float:left;
+           width: 150%;
+           height: 200px;
+           border: 1px solid #3B6273;
+       }
+    </style>
+    <title>恶意代码样本库查询结果</title>
+</head>
+
+
+
+<body class="bg-light">
+<div class="container">
+
+<!-- 杀毒软件检测结果 -->
+<div class="py-5 text-center">
+    <img class="d-block mx-auto mb-4" src="{{url_for('static', filename='s1.png')}}" alt="" width="72" height="72">
+    <h2> 杀毒软件检测结果 </h2>
+    <p class="text-muted "> 共有 <b class="text-danger">{{scans|length}}</b> 款杀毒软件检测到样本. </p>
+    <form class="needs-validation" novalidate>
+	<div class="row">
+	    <label for="MD5" class="text-info"> 样本MD5值: {{scan_md5}} </label>
+	</div>
+	<div class="row">
+            <label for="SHA256" class="text-info"> 样本SHA256值: {{scan_sha256}} </label>
+	</div>
+	<div class="row">
+            <label for="SHA256" class="text-info"> 样本的感染平台: {{platform}} </label>
+	</div>
+	<div class="row">
+            <label for="SHA256" class="text-info"> 样本的病毒类型: {{category}} </label>
+	</div>
+	<div class="row">
+            <label for="SHA256" class="text-info"> 样本的病毒家族: {{family}} </label>
+	</div>
+    </form>
+</div>
+
+
+<table class="table table-striped">
+    <thead> <!-- 表头 -->
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">杀毒软件</th>
+            <th scope="col">版本</th>
+            <th scope="col">检测结果</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for key, value in scans.items() %}
+        <tr>
+	    <th scope="row">{{loop.index}}</th>
+	    <td class="text-primary">{{key}}</td>
+	    <td class="text-secondary">{{value['version']}}</td>
+	    {% if value['result'] == "CLEAN" %}
+	        <td class="text-success">{{value['result']}}</td>
+	    {% else %}
+	        <td class="text-danger">{{value['result']}}</td>
+	    {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<!-- End of scan result container -->
+</div>
+
+<!-- Start of download container -->
+<div class="container">
+<div class="row">
+    <div class="col-sm">
+        <p> <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('.download_sha256', sha256=scan_sha256)}}">下载样本</a> </p>
+    </div>
+    <div class="col-sm">
+        <p> <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('.download_tgz', sha256=scan_sha256)}}">下载tgz压缩文件</a> </p>
+    </div>
+    <div class="col-sm">
+        <p> <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('.download_torrent', sha256=scan_sha256)}}">下载torrent文件</a> </p>
+    </div>
+    <div class="col-sm">
+        <p> <a class="btn btn-primary btn-lg btn-block" href="/malsample_search">返回</a> </p>
+    </div>
+</div>
+<!-- End of download container -->
+</div>
+
+</div>
+
+<!-- Add footer -->
+{% include "footer.html" %}
+
+
+</body>
+</html>

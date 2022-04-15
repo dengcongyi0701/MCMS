@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>恶意代码管理系统</title>
+    <!--<link rel="stylesheet" href="{{url_for('static', filename='css/search.css')}}">-->
+    <link rel="shortcut icon" href="../static/icon_page.png" type="image/x-icon">
+    <!-- Bootstrap core CSS -->
+    <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet">
+    <!-- Custom styles for form -->
+    <link href="{{url_for('static', filename='css/form-validation.css')}}" rel="stylesheet">
+    <!--jquery-->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+    <!-- echart js-->
+    <script type="text/javascript" src="{{url_for('static', filename='js/echarts.min.js') }}"></script>
+</head>
+
+<body class="bg-light">
+
+<!-- 页面公共头部 导航栏 -->
+<div id="headerpage">
+    {% include "header.html" %}
+</div>
+
+<div class="container-fluid pt-4">
+    <div class="text-center" >
+        <h2 class="text-primary text-dark">
+            <img src="{{url_for('static', filename='detect.png')}}" alt="" width="50" height="50">
+            <b>恶意代码样本库</b></h2>
+        <p class="text-secondary">样本统计情况</p>
+    </div>
+    <div class="row">
+        <div class="col-sm-3 px-2">
+            <!--样本库数据统计-->
+            <div class="jumbotron mb-2 p-5" style="background-color:#F0F8FF; border-style:solid; border-width:5px;border-color:#B0C4DE;">
+                <div class="database-contanier" >
+                    <div class="label-box" ><h3><b>样本库总量</b></h3></div>
+                    <div><p style="font-size:50px; color:#cc0033"><b>{{ sp_size }}万</b></p></div>
+                </div>
+            </div>
+            <!--样本家族分布-->
+            <div class="jumbotron mb-2 pt-2 px-2 pb-2" style="background-color:#F0F8FF; border-style:solid; border-width:5px;border-color:#B0C4DE;" >
+                <div class="my-0 w-100" id="piechart" style="height:400px;"></div>
+            </div>
+        </div>
+        <div class="col-sm-6 p-0" >
+            <!--样本类型数量-->
+            <div class="jumbotron mb-2 p-3" style="background-color:#F0F8FF; border-style:solid; border-width:5px;border-color:#B0C4DE;">
+                <div class="my-0 w-100" id="barchart" style="height:300px;"></div>
+            </div>
+            <!--样本数量变化统计图-->
+            <div class="jumbotron mb-2 pt-3 pb-0 px-1" style="background-color:#F0F8FF; border-style:solid; border-width:5px;border-color:#B0C4DE;">
+                <div class="my-0 w-100" id="barline" style="height:300px;"></div>
+            </div>
+        </div>
+    <div class="col-sm-3 px-2">
+        <!--详细类别信息列表-->
+        <div class="jumbotron mb-2 pt-3 px-2 pb-2" style="background-color:#F0F8FF; border-style:solid; border-width:5px;border-color:#B0C4DE;" >
+            <h5 class="text-dark"><b>详细类别信息</b></h5>
+                <div class="mt-3" style="height:600px; overflow:auto">
+                <table class="table table-bordered table-striped" style="text-align: center;" >
+                    <thead>
+                        <tr style="font-size:13px;background-color:#B0C4DE">
+                            <th>类别名称</th>
+                            <th>数量</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in tp_details["detailed_type"]%}
+                        <tr style="font-size:12px">
+                            <td><b>{{ item }}</b></td>
+                            <td><b>{{ tp_details["num"][loop.index0] }}</b></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+
+        </div>
+    </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-7 px-2">
+            <!--样本数量变化统计图-->
+            <div class="jumbotron mb-2 pt-3 pb-0 px-1" style="background-color:#F0F8FF; border-style:solid; border-width:5px;border-color:#B0C4DE;"">
+                <div class="my-0 w-100" id="barchart2" style="height:300px;"></div>
+            </div>
+        </div>
+        <div class="col-sm-5 pr-2 pl-0">
+            <!--样本家族分布-->
+            <div class="jumbotron mb-2 pt-3 pb-0 px-1" style="background-color:#F0F8FF; border-style:solid; border-width:5px;border-color:#B0C4DE;">
+                <div class="my-0 w-100" id="piechart2" style="height:300px;"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+<!--页脚-->
+<div id="footerpage">
+    {%  include 'footer.html' %}
+</div>
+</div>
+
+
+</body>
+</html>
+<script type="text/javascript">
+<!--样本类型数量-->
+var dom = document.getElementById("barchart");
+var barchart = echarts.init(dom, {devicePixelRatio: 2.5});
+var app = {};
+option = null;
+var dataMap = {};
+option = {
+    backgroundColor:"#f8f9fa",
+        title:{
+            show:true,
+            text:"恶意样本类型分布",
+            x: "center",
+            y: 20,
+            textStyle:{fontSize:17,}
+        },
+        tooltip: {
+            show:true,
+            trigger: 'axis',
+            axisPointer: {lineStyle: {color: 'red'}},
+        },
+        grid: {
+            left: '3%',
+            right: '6%',
+            bottom: '10%',
+            containLabel: true
+        },
+    xAxis: {
+        name:'类型',
+        nameTextStyle: {color: '#343a40'},
+        type: 'category',
+        axisLabel:  {
+                textStyle: {
+ 					color: "#343a40",
+					fontSize:10,
+                },
+            },
+        axisLine: {
+			lineStyle: {
+				color: '#343a40'
+			}
+        },
+        data: {{ sp_type|tojson }}.maltype,
+      },
+      yAxis: {
+        name: '数量（个）',
+        nameTextStyle: {color: '#343a40'},
+        type: 'value',
+        axisTick: {show: false},
+        axisLine: {
+            lineStyle: {
+                color: '#343a40'
+            }
+        },
+       axisLabel:  {
+            formatter: function(value,index){
+                      var value;
+                      value = value/10000+'w'
+                      return value; },
+
+            textStyle: {
+                color: "#343a40",
+                fontSize:13,
+            },
+       },
+
+        splitLine: {
+            lineStyle: {
+                 color: 'rgb(108,117,125,0.2)'
+            }
+        }
+      },
+      series: [
+        {
+            itemStyle: {
+                normal: {
+                    barBorderRadius: [8, 8, 0, 0],
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                        offset: 0,
+                        color: '#0099cc'
+                    }, {
+                        offset: 1,
+                        color: '#000099'
+                    }]),
+                }
+            },
+          data:{{ sp_type|tojson }}.num,
+          type: 'bar',
+          showBackground: true,
+          backgroundStyle: {
+            color: 'rgba(180, 180, 180, 0.2)'
+          }
+        }
+      ]
+    };
+    barchart.setOption(option)
+	window.onresize = barchart.resize;
+if (option && typeof option === "object") {
+    barchart.setOption(option, true);
+    window.onresize = barchart.resize;
+}
+
+<!--样本库数量变化-->
+var dom5 = document.getElementById("barline");
+var barline = echarts.init(dom5, {devicePixelRatio: 2.5});
+var minvm = Math.min.apply(null,{{ sp_addtions|tojson }}.total_num);
+var maxvm =Math.ceil(Math.max.apply(null,{{ sp_addtions|tojson }}.total_num)/10000)*10000;
+option = null;
+option = {
+  color:[new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                        offset: 0,
+                        color:"#B22222"
+                    }, {
+                        offset: 1,
+                        color: "#FFD700"
+                    }]),],
+  visualMap: [
+  {
+    show: false,
+    type: 'continuous',
+    seriesIndex: 1,
+    min: minvm,
+    max: maxvm,
+  },
+  ],
+  title:{
+            show:true,
+            text:"样本库数量变化",
+            textStyle:{fontSize:20,}
+        },
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'cross',
+      crossStyle: {
+        color: '#999'
+      }
+    }
+  },
+  toolbox: {
+    feature: {
+      dataView: { show: true, readOnly: false },
+      magicType: { show: true, type: ['line', 'bar'] },
+      restore: { show: true },
+      saveAsImage: { show: true }
+    }
+  },
+  legend: {
+    data: ['总量（个）', '新增数量（个）']
+  },
+  xAxis: [
+    {
+        name:'时间',
+        nameGap: 40,
+        nameLocation:'middle',
+        type: 'category',
+        data: {{ sp_addtions|tojson }}.date,
+        axisPointer: {
+        type: 'shadow'
+      }
+    }
+  ],
+  yAxis: [
+    {
+      type: 'value',
+      name: '新增数量（个）',
+    },
+    {
+        type: 'value',
+        name: '总量（个）',
+        min: minvm-10000,
+        max: maxvm+10000,
+        splitLine: {     //网格线
+          "show": false
+        },
+        axisLabel:  {
+            formatter: function(value,index){
+                      var value;
+                      value = value/10000+'w'
+                      return value; },
+       },
+    }
+  ],
+  series: [
+    {
+      name: '新增数量（个）',
+      itemStyle: {
+        normal: {
+            barBorderRadius: [12,12,12,12],
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                offset: 0,
+                color:"#90EE90"
+            }, {
+                offset: 1,
+                color: "#f0caca"
+            }]),
+        }
+    },
+      type: 'bar',
+      tooltip: {
+        valueFormatter: function (value) {
+          return value + ' ml';
+        }
+      },
+      data: {{ sp_addtions|tojson }}.new_sample_num
+    },
+    {
+      name: '总量（个）',
+      type: 'line',
+      yAxisIndex: 1,
+      tooltip: {
+        valueFormatter: function (value) {
+          return value + ' °C';
+        }
+      },
+      data: {{ sp_addtions|tojson }}.total_num
+    }
+  ]
+};
+barline.setOption(option)
+	window.onresize = barline.resize;
+if (option && typeof option === "object") {
+    barline.setOption(option, true);
+    window.onresize = barline.resize;
+}
+
+<!--样本类大小分布-->
+var dom6 = document.getElementById("piechart");
+var piechart = echarts.init(dom6, {devicePixelRatio: 2.5});
+option = null;
+option = {
+    title:{
+            show:true,
+            text:"样本大小分布",
+            textStyle:{fontSize:20}
+        },
+    legend: {
+    top: 'bottom'
+    },
+    tooltip:{
+          trigger: 'item',
+    },
+  toolbox: {
+    show: true,
+    feature: {
+      mark: { show: true },
+      dataView: { show: true, readOnly: false },
+      restore: { show: true },
+      saveAsImage: { show: true }
+    }
+  },
+  series: [
+    {
+      name: '样本大小',
+      type: 'pie',
+
+      center: ['50%', '50%'],
+      roseType: 'area',
+      itemStyle: {
+        borderRadius: 8
+      },
+      data: [
+          {% for item in sp_attribute["interval"] %}
+              {value:{{sp_attribute["num"][loop.index0]}}, name: '{{ item }}'},
+          {% endfor %}
+      ]
+    }
+  ]
+};
+piechart.setOption(option)
+	window.onresize = piechart.resize;
+if (option && typeof option === "object") {
+    piechart.setOption(option, true);
+    window.onresize = piechart.resize;
+}
+
+<!--样本采集时间-->
+var dom7 = document.getElementById("barchart2");
+var barchart2 = echarts.init(dom7, {devicePixelRatio: 2.5});
+option = null;
+option = {
+        title:{
+                show:true,
+                text:"样本采集时间",
+                textStyle:{
+                    fontSize:20,
+                }
+            },
+        backgroundColor: "transparent",
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "shadow",
+          },
+        },
+        grid: {
+          top: "25%",
+          bottom: "15%",
+        },
+        xAxis: [
+          {
+            name:"年度",
+            type: "category",
+            data: {{ sp_year|tojson }}.year,
+            axisLabel: {
+              margin: 10,
+              textStyle: {
+              },
+            },
+          },
+        ],
+        yAxis: [
+          {
+            name: "数量",
+            nameTextStyle: {
+
+              padding: 12,
+            },
+            axisLabel: {
+                formatter: function(value,index){
+                      var value;
+                      value = value/10000+'w'
+                      return value; },
+            },
+            axisLine: {
+              show: false,
+            },
+            splitLine: {
+              lineStyle: {
+                type: "dashed",
+                color: "rgba(112,112,112,0.4)",
+              },
+            },
+          },
+        ],
+        series: [
+          {
+            data: {{ sp_year|tojson }}.num,
+            type: "bar",
+            itemStyle: {
+              color: {
+                type: "linear",
+                x: 0,
+                y: 0,
+                x2: 1,
+                y2: 1,
+                colorStops: [
+                  {
+                    offset: 0,
+                    color: "rgba(64, 200, 169, 0.8)", // 0% 处的颜色
+                  },
+                  {
+                    offset: 1,
+                    color: "rgba(64, 200, 169, 0)", // 100% 处的颜色
+                  },
+                ],
+              },
+              borderColor: "#40C8A9",
+              borderType: "solid",
+              barBorderRadius: [5, 5, 0, 0],
+            },
+          },
+        ],
+};
+barchart2.setOption(option)
+	window.onresize = barchart2.resize;
+if (option && typeof option === "object") {
+    barchart2.setOption(option, true);
+    window.onresize = barchart2.resize;
+}
+
+<!--样本家族分布-->
+var dom8 = document.getElementById("piechart2");
+var piechart2 = echarts.init(dom8, {devicePixelRatio:2.5});
+option = null;
+option = {
+    title: {
+        text: '样本家族分布',
+        textStyle: {
+          fontSize: 20
+        }
+    },
+    legend: {
+        x:'right',
+        y:'top',
+        width: 50
+    },
+  series: {
+      type: 'pie',
+      radius: [30, 70],
+
+      width: 400,
+      itemStyle: {
+        borderColor: '#6a6a6a',
+        borderWidth: 1.6
+      },
+      label: {
+        alignTo: 'edge',
+        formatter: '{family|{b}}\n{num|{c} (个)}',
+        minMargin: 5,
+        edgeDistance: 10,
+        lineHeight: 15,
+        rich: {
+          num: {
+            fontSize: 10,
+            color: '#999'
+          },
+          family: {
+              fontSize: 13,
+              color: '#6a6a6a'
+          }
+        }
+      },
+      labelLine: {
+        length: 15,
+        length2: 0,
+        maxSurfaceAngle: 80
+      },
+      labelLayout: function (params) {
+        const isLeft = params.labelRect.x < myChart.getWidth() / 2;
+        const points = params.labelLinePoints;
+        // Update the end point.
+        points[2][0] = isLeft
+          ? params.labelRect.x
+          : params.labelRect.x + params.labelRect.width;
+        return {
+          labelLinePoints: points
+        };
+      },
+      data: [
+          {% for item in sp_family["family"] %}
+              {value:{{sp_family["num"][loop.index0]}}, name: '{{ item }}'},
+          {% endfor %}
+      ]
+    },
+};
+piechart2.setOption(option)
+	window.onresize = piechart2.resize;
+if (option && typeof option === "object") {
+    piechart2.setOption(option, true);
+    window.onresize = piechart2.resize;
+}
+</script>
+
+<style type="text/css">
+.database-contanier{
+    text-align: center;
+    margin: 0 auto;
+}
+.label-box{
+    display: inline-block;
+}
+.label-box > h4:nth-child(1){
+    font-weight: bold;
+    color: #343a40;
+}
+.label-box > h4:nth-child(2) {
+    color: #17a2b8;
+    font-weight: bold;
+}
+</style>

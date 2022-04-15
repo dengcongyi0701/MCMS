@@ -1,0 +1,37 @@
+<nav class="pt-0 pb-0 pl-0 pr-0 navbar navbar-expand-md navbar-dark " style="background-color:#333e47">
+    <a class=" p-2 m-0 navbar-brand rounded-top bg-dark" href="/" style="text-align:center; width:200px; border-style:solid none none solid; border-width:2px;border-color:#d0e6f1;">
+        <img src="{{url_for('static', filename='database.png')}}" width="25" height="25" >&nbsp;&nbsp;恶意代码样本库</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    <a class=" p-2 m-0 navbar-brand rounded-top bg-dark" href="/malsample_search" style="text-align:center; width:200px;border-style:solid none none solid; border-width:2px;border-color:#d0e6f1;">
+        <img src="{{url_for('static', filename='search_icon.png')}}" width="25" height="25" >&nbsp;&nbsp;样本查询</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    <a class=" p-2 m-0 navbar-brand rounded-top bg-dark" href="/malurl_query" style="text-align:center; width:200px;border-style:solid solid none solid; border-width:2px;border-color:#d0e6f1;">
+        <img src="{{url_for('static', filename='url_detect.png')}}" width="25" height="25" >&nbsp;&nbsp;恶意域名检测</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+  <div class="collapse navbar-collapse" id="navbarCollapse">
+{##}
+{#      <ul class="navbar-nav mr-auto">#}
+{#    <!--jinja2 条件判断 让当前页面的选项卡高亮-->#}
+{#      {% if element == 2 %}#}
+{#        <li class="nav-item active">#}
+{#      {% else %}#}
+{#        <li class="nav-item">#}
+{#      {% endif %}#}
+{#        <a class="nav-link" href="{{ url_for('show_malUrl') }}" rel="external">恶意域名检测</a>#}
+{#      </li>#}
+{#    </ul>#}
+  </div>
+</nav>
+
+<style type="text/css">
+.bg-DimGray{
+    background-color:#696969
+}
+</style>
